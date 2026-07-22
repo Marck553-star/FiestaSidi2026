@@ -1,0 +1,11 @@
+entrypoint = "server/index.ts"
+run = "npm run dev"
+modules = ["nodejs-20"]
+
+[deployment]
+build = "npm install && npm run build"
+run = "npm run start"
+
+[[ports]]
+localPort = 5000
+externalPort = 80
