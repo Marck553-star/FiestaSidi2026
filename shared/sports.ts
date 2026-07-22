@@ -5,24 +5,32 @@ export type TeamMode =
   | "team-3";
 
 export interface PrizeDefinition {
-  position: string;
-  result: string;
-  type: string;
-  quantity: number | null;
-  note?: string;
+  readonly position: string;
+  readonly result: string;
+  readonly type: string;
+  readonly quantity: number | null;
+  readonly note?: string;
 }
 
 export interface SportDefinition {
-  key: string;
-  name: string;
-  shortName: string;
-  category: string;
-  teamMode: TeamMode;
-  fixedParticipants: 1 | 2 | 3;
-  levelOptions?: readonly string[];
-  requiresAge?: boolean;
-  prizes: readonly PrizeDefinition[];
-  prizeNote?: string;
+  readonly key: string;
+  readonly name: string;
+  readonly shortName: string;
+  readonly category: string;
+
+  readonly teamMode: TeamMode;
+  readonly fixedParticipants: 1 | 2 | 3;
+
+  readonly levelOptions?: readonly string[];
+  readonly levelLabel?: string;
+  readonly levelPlaceholder?: string;
+  readonly levelOptionLabels?: Readonly<Record<string, string>>;
+
+  readonly requiresAge?: boolean;
+  readonly registrationNote?: string;
+
+  readonly prizes: readonly PrizeDefinition[];
+  readonly prizeNote?: string;
 }
 
 const firstSecond = (
@@ -45,6 +53,11 @@ const firstSecond = (
   },
 ];
 
+const PADEL_LEVEL_LABELS: Readonly<Record<string, string>> = {
+  A: "A · Alto/medio",
+  B: "B · Medio/bajo",
+};
+
 const SPORT_DEFINITIONS = {
   "padel-masculino": {
     key: "padel-masculino",
@@ -54,8 +67,17 @@ const SPORT_DEFINITIONS = {
     teamMode: "optional-pair",
     fixedParticipants: 1,
     levelOptions: ["A", "B"],
-    prizes: firstSecond(4, 4, "Campeones A y B", "Subcampeones A y B"),
+    levelLabel: "Nivel",
+    levelPlaceholder: "Selecciona tu nivel",
+    levelOptionLabels: PADEL_LEVEL_LABELS,
+    prizes: firstSecond(
+      4,
+      4,
+      "Campeones A y B",
+      "Subcampeones A y B",
+    ),
   },
+
   "padel-femenino": {
     key: "padel-femenino",
     name: "Pádel Femenino",
@@ -64,8 +86,17 @@ const SPORT_DEFINITIONS = {
     teamMode: "optional-pair",
     fixedParticipants: 1,
     levelOptions: ["A", "B"],
-    prizes: firstSecond(4, 4, "Campeonas A y B", "Subcampeonas A y B"),
+    levelLabel: "Nivel",
+    levelPlaceholder: "Selecciona tu nivel",
+    levelOptionLabels: PADEL_LEVEL_LABELS,
+    prizes: firstSecond(
+      4,
+      4,
+      "Campeonas A y B",
+      "Subcampeonas A y B",
+    ),
   },
+
   "padel-mixto": {
     key: "padel-mixto",
     name: "Pádel Mixto",
@@ -74,8 +105,12 @@ const SPORT_DEFINITIONS = {
     teamMode: "optional-pair",
     fixedParticipants: 1,
     levelOptions: ["A", "B"],
+    levelLabel: "Nivel",
+    levelPlaceholder: "Selecciona tu nivel",
+    levelOptionLabels: PADEL_LEVEL_LABELS,
     prizes: firstSecond(2, 2),
   },
+
   "padel-infantil": {
     key: "padel-infantil",
     name: "Pádel Infantil",
@@ -85,8 +120,10 @@ const SPORT_DEFINITIONS = {
     fixedParticipants: 1,
     requiresAge: true,
     prizes: firstSecond(2, 2),
-    prizeNote: "En el documento original aparece marcado con interrogantes.",
+    prizeNote:
+      "En el documento original aparece marcado con interrogantes.",
   },
+
   "tenis-masculino": {
     key: "tenis-masculino",
     name: "Tenis Masculino",
@@ -96,6 +133,7 @@ const SPORT_DEFINITIONS = {
     fixedParticipants: 1,
     prizes: firstSecond(1, 1),
   },
+
   "tenis-femenino": {
     key: "tenis-femenino",
     name: "Tenis Femenino",
@@ -105,6 +143,7 @@ const SPORT_DEFINITIONS = {
     fixedParticipants: 1,
     prizes: firstSecond(1, 1),
   },
+
   "tenis-infantil": {
     key: "tenis-infantil",
     name: "Tenis Infantil",
@@ -114,8 +153,8 @@ const SPORT_DEFINITIONS = {
     fixedParticipants: 1,
     requiresAge: true,
     prizes: [],
-    prizeNote: "Actividad conservada de la web original; premio no indicado en el documento.",
   },
+
   "pingpong-masculino": {
     key: "pingpong-masculino",
     name: "Ping-Pong Masculino",
@@ -125,6 +164,7 @@ const SPORT_DEFINITIONS = {
     fixedParticipants: 1,
     prizes: firstSecond(1, 1),
   },
+
   "pingpong-femenino": {
     key: "pingpong-femenino",
     name: "Ping-Pong Femenino",
@@ -133,8 +173,8 @@ const SPORT_DEFINITIONS = {
     teamMode: "individual",
     fixedParticipants: 1,
     prizes: [],
-    prizeNote: "Actividad conservada de la web original; premio no indicado en el documento.",
   },
+
   "pingpong-infantil": {
     key: "pingpong-infantil",
     name: "Ping-Pong Infantil",
@@ -145,6 +185,7 @@ const SPORT_DEFINITIONS = {
     requiresAge: true,
     prizes: firstSecond(1, 1),
   },
+
   "basket-3x3-masculino": {
     key: "basket-3x3-masculino",
     name: "Basket 3x3 Masculino",
@@ -154,6 +195,53 @@ const SPORT_DEFINITIONS = {
     fixedParticipants: 3,
     prizes: firstSecond(3, 3),
   },
+
+  futbol: {
+    key: "futbol",
+    name: "Fútbol",
+    shortName: "Fútbol",
+    category: "Fútbol",
+    teamMode: "individual",
+    fixedParticipants: 1,
+
+    levelOptions: [
+      "Bloques 1 y 2",
+      "Bloque 3",
+      "Bloques 4 y 5",
+    ],
+
+    levelLabel: "Bloque",
+    levelPlaceholder: "Selecciona tu bloque",
+
+    registrationNote:
+      "Selecciona obligatoriamente el bloque al que perteneces.",
+
+    prizes: [],
+  },
+
+  "golf-adultos": {
+    key: "golf-adultos",
+    name: "Golf Adultos",
+    shortName: "Adultos",
+    category: "Golf",
+    teamMode: "individual",
+    fixedParticipants: 1,
+    registrationNote: "Una persona por inscripción.",
+    prizes: [],
+  },
+
+  "golf-infantil": {
+    key: "golf-infantil",
+    name: "Golf Infantil",
+    shortName: "Infantil",
+    category: "Golf",
+    teamMode: "individual",
+    fixedParticipants: 1,
+    requiresAge: true,
+    registrationNote: "Una persona por inscripción.",
+    prizes: [],
+  },
+
   "natacion-infantil": {
     key: "natacion-infantil",
     name: "Natación Infantil",
@@ -176,9 +264,8 @@ const SPORT_DEFINITIONS = {
         quantity: null,
       },
     ],
-    prizeNote:
-      "Natación Infantil se ha añadido a la web, pero sus premios no aparecen en el documento recibido.",
   },
+
   "futbolin-infantil": {
     key: "futbolin-infantil",
     name: "Futbolín Infantil",
@@ -189,6 +276,7 @@ const SPORT_DEFINITIONS = {
     requiresAge: true,
     prizes: firstSecond(2, 2),
   },
+
   "futbolin-masculino": {
     key: "futbolin-masculino",
     name: "Futbolín Masculino",
@@ -198,6 +286,7 @@ const SPORT_DEFINITIONS = {
     fixedParticipants: 2,
     prizes: firstSecond(2, 2),
   },
+
   "futbolin-femenino": {
     key: "futbolin-femenino",
     name: "Futbolín Femenino",
@@ -207,6 +296,7 @@ const SPORT_DEFINITIONS = {
     fixedParticipants: 2,
     prizes: firstSecond(2, 2),
   },
+
   "futbolin-mixto": {
     key: "futbolin-mixto",
     name: "Futbolín Mixto",
@@ -216,6 +306,7 @@ const SPORT_DEFINITIONS = {
     fixedParticipants: 2,
     prizes: firstSecond(2, 2),
   },
+
   mus: {
     key: "mus",
     name: "Mus",
@@ -225,6 +316,7 @@ const SPORT_DEFINITIONS = {
     fixedParticipants: 1,
     prizes: firstSecond(2, 0),
   },
+
   domino: {
     key: "domino",
     name: "Dominó",
@@ -234,15 +326,28 @@ const SPORT_DEFINITIONS = {
     fixedParticipants: 1,
     prizes: firstSecond(2, 0),
   },
+
   parchis: {
     key: "parchis",
     name: "Parchís",
-    shortName: "Parchís",
+    shortName: "Parchís Adultos",
     category: "Juegos de mesa",
     teamMode: "optional-pair",
     fixedParticipants: 1,
     prizes: firstSecond(2, 2),
   },
+
+  "parchis-infantil": {
+    key: "parchis-infantil",
+    name: "Parchís Infantil",
+    shortName: "Parchís Infantil",
+    category: "Juegos de mesa",
+    teamMode: "optional-pair",
+    fixedParticipants: 1,
+    requiresAge: true,
+    prizes: [],
+  },
+
   uno: {
     key: "uno",
     name: "UNO",
@@ -252,6 +357,7 @@ const SPORT_DEFINITIONS = {
     fixedParticipants: 1,
     prizes: firstSecond(1, 1),
   },
+
   ajedrez: {
     key: "ajedrez",
     name: "Ajedrez",
@@ -261,7 +367,31 @@ const SPORT_DEFINITIONS = {
     fixedParticipants: 1,
     prizes: firstSecond(1, 1),
   },
-  
+
+  "concurso-tortillas": {
+    key: "concurso-tortillas",
+    name: "Concurso de tortillas de patata",
+    shortName: "Concurso de tortillas",
+    category: "Eventos",
+    teamMode: "individual",
+    fixedParticipants: 1,
+    registrationNote:
+      "Inscripción para participar en el concurso de tortillas de patata.",
+    prizes: [],
+  },
+
+  "cena-viernes-sabado": {
+    key: "cena-viernes-sabado",
+    name: "Cena de viernes y sábado",
+    shortName: "Cena viernes y sábado",
+    category: "Eventos",
+    teamMode: "individual",
+    fixedParticipants: 1,
+    registrationNote:
+      "Una única inscripción incluye la cena del viernes y la del sábado.",
+    prizes: [],
+  },
+
   "rey-fiestas": {
     key: "rey-fiestas",
     name: "Rey de las Fiestas",
@@ -271,8 +401,8 @@ const SPORT_DEFINITIONS = {
     fixedParticipants: 1,
     requiresAge: true,
     prizes: [],
-    prizeNote: "Actividad especial conservada de la web original.",
   },
+
   "reina-fiestas": {
     key: "reina-fiestas",
     name: "Reina de las Fiestas",
@@ -282,22 +412,29 @@ const SPORT_DEFINITIONS = {
     fixedParticipants: 1,
     requiresAge: true,
     prizes: [],
-    prizeNote: "Actividad especial conservada de la web original.",
   },
-} as const;
+} as const satisfies Record<string, SportDefinition>;
 
 export type SportKey = keyof typeof SPORT_DEFINITIONS;
-export const SPORTS: Record<SportKey, SportDefinition> = SPORT_DEFINITIONS;
-export const SPORT_KEYS = Object.keys(SPORTS) as SportKey[];
+
+export const SPORTS =
+  SPORT_DEFINITIONS as Record<SportKey, SportDefinition>;
+
+export const SPORT_KEYS = Object.keys(
+  SPORTS,
+) as SportKey[];
 
 export const SPORT_CATEGORY_ORDER = [
   "Pádel",
   "Tenis",
   "Ping-Pong",
   "Basket",
+  "Fútbol",
+  "Golf",
   "Natación",
   "Futbolín",
   "Juegos de mesa",
+  "Eventos",
   "Eventos especiales",
 ] as const;
 
@@ -306,7 +443,11 @@ export const WHATSAPP_COMMUNITY_URL =
 
 export const PRIZE_STOCK = {
   competitions: [
-    { label: "Trofeos de campeones", quantity: 35, note: "Total indicado" },
+    {
+      label: "Trofeos de campeones",
+      quantity: 35,
+      note: "Total indicado",
+    },
     {
       label: "Subtotal de trofeos de Pádel",
       quantity: 12,
@@ -317,13 +458,18 @@ export const PRIZE_STOCK = {
       quantity: null,
       note: "Cantidad general no indicada en el documento",
     },
-    { label: "Medallas de plata", quantity: 31, note: "Total indicado" },
+    {
+      label: "Medallas de plata",
+      quantity: 31,
+      note: "Total indicado",
+    },
     {
       label: "Medallas de bronce",
       quantity: null,
       note: "Cantidad general no indicada en el documento",
     },
   ],
+
   children: [
     {
       label: "Medallas infantiles de oro",
@@ -341,38 +487,75 @@ export const PRIZE_STOCK = {
       note: "Aproximadamente; revisar sobrantes del año pasado",
     },
   ],
+
   extras: [
-    { label: "Medallas de oro variadas", quantity: 6 },
-    { label: "Medallas de plata para cartas", quantity: 4 },
+    {
+      label: "Medallas de oro variadas",
+      quantity: 6,
+    },
+    {
+      label: "Medallas de plata para cartas",
+      quantity: 4,
+    },
   ],
 } as const;
 
-export function isSportKey(value: unknown): value is SportKey {
-  return typeof value === "string" && value in SPORTS;
-}
-
-export function getSport(key: SportKey): SportDefinition {
-  return SPORTS[key];
-}
-
-export function getSportName(key: string): string {
-  return isSportKey(key) ? SPORTS[key].name : key;
-}
-
-export function getSportsByCategory(category: string): SportDefinition[] {
-  return SPORT_KEYS.map((key) => SPORTS[key]).filter(
-    (sport) => sport.category === category,
+export function isSportKey(
+  value: unknown,
+): value is SportKey {
+  return (
+    typeof value === "string" &&
+    value in SPORTS
   );
 }
 
-export function calculateParticipantCount(input: {
-  deporte: SportKey;
-  pareja?: "si" | "no" | null;
-}): number {
+export function getSport(
+  key: SportKey,
+): SportDefinition {
+  return SPORTS[key];
+}
+
+export function getSportName(
+  key: string,
+): string {
+  return isSportKey(key)
+    ? SPORTS[key].name
+    : key;
+}
+
+export function getSportsByCategory(
+  category: string,
+): SportDefinition[] {
+  return SPORT_KEYS
+    .map((key) => SPORTS[key])
+    .filter(
+      (sport) =>
+        sport.category === category,
+    );
+}
+
+export function calculateParticipantCount(
+  input: {
+    deporte: SportKey;
+    pareja?: "si" | "no" | null;
+  },
+): number {
   const sport = SPORTS[input.deporte];
 
-  if (sport.teamMode === "required-pair") return 2;
-  if (sport.teamMode === "team-3") return 3;
-  if (sport.teamMode === "optional-pair" && input.pareja === "si") return 2;
+  if (sport.teamMode === "required-pair") {
+    return 2;
+  }
+
+  if (sport.teamMode === "team-3") {
+    return 3;
+  }
+
+  if (
+    sport.teamMode === "optional-pair" &&
+    input.pareja === "si"
+  ) {
+    return 2;
+  }
+
   return 1;
 }

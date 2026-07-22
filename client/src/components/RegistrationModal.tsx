@@ -1,22 +1,35 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type FormEvent,
+} from "react";
+
 import { Modal } from "./Modal";
+
 import {
   SPORTS,
   type SportDefinition,
   type SportKey,
 } from "@shared/sports";
-import type { RegistrationPayload } from "@shared/types";
+
+import type {
+  RegistrationPayload,
+} from "@shared/types";
 
 interface RegistrationModalProps {
   sportKey: SportKey | null;
   onClose: () => void;
-  onSuccess: (participantsAdded: number) => void;
+  onSuccess: (
+    participantsAdded: number,
+  ) => void;
 }
 
 interface FormState {
   nombre: string;
   nivel: string;
   edad: string;
+
   pareja: "" | "si" | "no";
 
   nombreIntegrante1: string;
@@ -30,6 +43,7 @@ const EMPTY_FORM: FormState = {
   nombre: "",
   nivel: "",
   edad: "",
+
   pareja: "",
 
   nombreIntegrante1: "",
@@ -39,10 +53,14 @@ const EMPTY_FORM: FormState = {
   comentarios: "",
 };
 
-function fieldLabel(sport: SportDefinition): string {
-  return sport.teamMode === "team-3"
-    ? "Nombre del equipo"
-    : "Nombre completo";
+function fieldLabel(
+  sport: SportDefinition,
+): string {
+  if (sport.teamMode === "team-3") {
+    return "Nombre del equipo";
+  }
+
+  return "Nombre completo";
 }
 
 export function RegistrationModal({
@@ -50,18 +68,31 @@ export function RegistrationModal({
   onClose,
   onSuccess,
 }: RegistrationModalProps) {
-  const [form, setForm] = useState<FormState>(EMPTY_FORM);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [submitting, setSubmitting] = useState(false);
-  const [serverMessage, setServerMessage] = useState("");
+  const [form, setForm] =
+    useState<FormState>(EMPTY_FORM);
 
-  const sport = sportKey ? SPORTS[sportKey] : null;
+  const [errors, setErrors] =
+    useState<Record<string, string>>({});
+
+  const [submitting, setSubmitting] =
+    useState(false);
+
+  const [
+    serverMessage,
+    setServerMessage,
+  ] = useState("");
+
+  const sport = sportKey
+    ? SPORTS[sportKey]
+    : null;
 
   useEffect(() => {
     setForm({
       ...EMPTY_FORM,
+
       pareja:
-        sport?.teamMode === "required-pair" ||
+        sport?.teamMode ===
+          "required-pair" ||
         sport?.teamMode === "team-3"
           ? "si"
           : "",
@@ -75,37 +106,47 @@ export function RegistrationModal({
     sport?.teamMode === "optional-pair";
 
   const showPartnerName =
-    sport?.teamMode === "required-pair" ||
+    sport?.teamMode ===
+      "required-pair" ||
     form.pareja === "si";
 
-  const expectedParticipants = useMemo(() => {
-    if (!sport) {
+  const expectedParticipants =
+    useMemo(() => {
+      if (!sport) {
+        return 1;
+      }
+
+      if (
+        sport.teamMode ===
+        "required-pair"
+      ) {
+        return 2;
+      }
+
+      if (
+        sport.teamMode === "team-3"
+      ) {
+        return 3;
+      }
+
+      if (
+        sport.teamMode ===
+          "optional-pair" &&
+        form.pareja === "si"
+      ) {
+        return 2;
+      }
+
       return 1;
-    }
+    }, [sport, form.pareja]);
 
-    if (sport.teamMode === "required-pair") {
-      return 2;
-    }
-
-    if (sport.teamMode === "team-3") {
-      return 3;
-    }
-
-    if (
-      sport.teamMode === "optional-pair" &&
-      form.pareja === "si"
-    ) {
-      return 2;
-    }
-
-    return 1;
-  }, [sport, form.pareja]);
-
-  if (!sport) {
+  if (!sport || !sportKey) {
     return null;
   }
 
-  const update = <K extends keyof FormState>(
+  const update = <
+    K extends keyof FormState,
+  >(
     key: K,
     value: FormState[K],
   ) => {
@@ -115,16 +156,25 @@ export function RegistrationModal({
     }));
 
     setErrors((current) => {
-      const next = { ...current };
+      const next = {
+        ...current,
+      };
+
       delete next[key];
+
       return next;
     });
   };
 
   const validate = (): boolean => {
-    const nextErrors: Record<string, string> = {};
+    const nextErrors: Record<
+      string,
+      string
+    > = {};
 
-    if (form.nombre.trim().length < 2) {
+    if (
+      form.nombre.trim().length < 2
+    ) {
       nextErrors.nombre =
         sport.teamMode === "team-3"
           ? "Escribe un nombre válido para el equipo."
@@ -133,7 +183,9 @@ export function RegistrationModal({
 
     if (
       sport.teamMode === "team-3" &&
-      form.nombreIntegrante1.trim().length < 2
+      form.nombreIntegrante1
+        .trim()
+        .length < 2
     ) {
       nextErrors.nombreIntegrante1 =
         "Escribe el nombre del primer integrante.";
@@ -141,7 +193,9 @@ export function RegistrationModal({
 
     if (
       sport.teamMode === "team-3" &&
-      form.nombrePareja.trim().length < 2
+      form.nombrePareja
+        .trim()
+        .length < 2
     ) {
       nextErrors.nombrePareja =
         "Escribe el nombre del segundo integrante.";
@@ -149,7 +203,9 @@ export function RegistrationModal({
 
     if (
       sport.teamMode === "team-3" &&
-      form.nombreCompanero2.trim().length < 2
+      form.nombreCompanero2
+        .trim()
+        .length < 2
     ) {
       nextErrors.nombreCompanero2 =
         "Escribe el nombre del tercer integrante.";
@@ -157,13 +213,21 @@ export function RegistrationModal({
 
     if (
       sport.levelOptions &&
-      !sport.levelOptions.includes(form.nivel)
+      !sport.levelOptions.includes(
+        form.nivel,
+      )
     ) {
-      nextErrors.nivel =
-        "Selecciona el nivel A o B.";
+      nextErrors.nivel = `Selecciona ${
+        sport.levelLabel
+          ? sport.levelLabel.toLowerCase()
+          : "una opción"
+      }.`;
     }
 
-    if (sport.requiresAge && form.edad === "") {
+    if (
+      sport.requiresAge &&
+      form.edad === ""
+    ) {
       nextErrors.edad =
         "La edad es obligatoria.";
     }
@@ -179,68 +243,80 @@ export function RegistrationModal({
     if (
       sport.teamMode !== "team-3" &&
       showPartnerName &&
-      form.nombrePareja.trim().length < 2
+      form.nombrePareja
+        .trim()
+        .length < 2
     ) {
       nextErrors.nombrePareja =
-        sport.teamMode === "required-pair"
+        sport.teamMode ===
+        "required-pair"
           ? "El nombre de la pareja es obligatorio."
           : "Escribe el nombre de tu pareja.";
     }
 
     setErrors(nextErrors);
 
-    return Object.keys(nextErrors).length === 0;
+    return (
+      Object.keys(nextErrors).length ===
+      0
+    );
   };
 
   const handleSubmit = async (
     event: FormEvent<HTMLFormElement>,
   ) => {
     event.preventDefault();
+
     setServerMessage("");
 
     if (!validate()) {
       return;
     }
 
-    const payload: RegistrationPayload = {
-      nombre: form.nombre.trim(),
+    const payload: RegistrationPayload =
+      {
+        nombre: form.nombre.trim(),
 
-      nivel: form.nivel || null,
+        nivel:
+          form.nivel || null,
 
-      edad:
-        form.edad === ""
-          ? null
-          : Number(form.edad),
+        edad:
+          form.edad === ""
+            ? null
+            : Number(form.edad),
 
-      deporte: sportKey,
+        deporte: sportKey,
 
-      pareja:
-        sport.teamMode === "required-pair" ||
-        sport.teamMode === "team-3"
-          ? "si"
-          : sport.teamMode === "optional-pair"
-            ? form.pareja || null
+        pareja:
+          sport.teamMode ===
+            "required-pair" ||
+          sport.teamMode === "team-3"
+            ? "si"
+            : sport.teamMode ===
+                "optional-pair"
+              ? form.pareja || null
+              : null,
+
+        nombreIntegrante1:
+          sport.teamMode === "team-3"
+            ? form.nombreIntegrante1.trim()
             : null,
 
-      nombreIntegrante1:
-        sport.teamMode === "team-3"
-          ? form.nombreIntegrante1.trim()
-          : null,
+        nombrePareja:
+          sport.teamMode === "team-3" ||
+          showPartnerName
+            ? form.nombrePareja.trim()
+            : null,
 
-      nombrePareja:
-        sport.teamMode === "team-3" ||
-        showPartnerName
-          ? form.nombrePareja.trim()
-          : null,
+        nombreCompanero2:
+          sport.teamMode === "team-3"
+            ? form.nombreCompanero2.trim()
+            : null,
 
-      nombreCompanero2:
-        sport.teamMode === "team-3"
-          ? form.nombreCompanero2.trim()
-          : null,
-
-      comentarios:
-        form.comentarios.trim() || null,
-    };
+        comentarios:
+          form.comentarios.trim() ||
+          null,
+      };
 
     setSubmitting(true);
 
@@ -249,9 +325,12 @@ export function RegistrationModal({
         "/api/registrations",
         {
           method: "POST",
+
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type":
+              "application/json",
           },
+
           body: JSON.stringify(payload),
         },
       );
@@ -261,19 +340,26 @@ export function RegistrationModal({
         .catch(() => ({}));
 
       if (!response.ok) {
-        const fieldErrors = data.errors as
-          | Record<string, string[]>
-          | undefined;
+        const fieldErrors =
+          data.errors as
+            | Record<
+                string,
+                string[]
+              >
+            | undefined;
 
         if (fieldErrors) {
-          const normalized = Object.fromEntries(
-            Object.entries(fieldErrors).map(
-              ([key, value]) => [
-                key,
-                value[0],
-              ],
-            ),
-          );
+          const normalized =
+            Object.fromEntries(
+              Object.entries(
+                fieldErrors,
+              ).map(
+                ([key, value]) => [
+                  key,
+                  value[0],
+                ],
+              ),
+            );
 
           setErrors(normalized);
         }
@@ -312,36 +398,54 @@ export function RegistrationModal({
         onSubmit={handleSubmit}
         noValidate
       >
-        {(sport.teamMode === "required-pair" ||
-          sport.teamMode === "team-3") && (
+        {sport.registrationNote && (
           <div className="info-callout">
             <strong>
-              {sport.teamMode === "required-pair"
+              {sport.registrationNote}
+            </strong>
+          </div>
+        )}
+
+        {(sport.teamMode ===
+          "required-pair" ||
+          sport.teamMode ===
+            "team-3") && (
+          <div className="info-callout">
+            <strong>
+              {sport.teamMode ===
+              "required-pair"
                 ? "Inscripción obligatoria por parejas"
                 : "Inscripción obligatoria por equipos de tres"}
             </strong>
 
             <span>
               Esta inscripción añadirá{" "}
-              {expectedParticipants} participantes
-              al contador.
+              {expectedParticipants}{" "}
+              participantes al contador.
             </span>
           </div>
         )}
 
         <label className="field">
-          <span>{fieldLabel(sport)}</span>
+          <span>
+            {fieldLabel(sport)}
+          </span>
 
           <input
             value={form.nombre}
             onChange={(event) =>
-              update("nombre", event.target.value)
+              update(
+                "nombre",
+                event.target.value,
+              )
             }
             placeholder={
-              sport.teamMode === "team-3"
+              sport.teamMode ===
+              "team-3"
                 ? "Ej.: Los Invencibles"
                 : "Nombre y apellidos"
             }
+            autoComplete="name"
           />
 
           {errors.nombre && (
@@ -351,13 +455,18 @@ export function RegistrationModal({
           )}
         </label>
 
-        {sport.teamMode === "team-3" && (
+        {sport.teamMode ===
+          "team-3" && (
           <>
             <label className="field">
-              <span>Primer integrante</span>
+              <span>
+                Primer integrante
+              </span>
 
               <input
-                value={form.nombreIntegrante1}
+                value={
+                  form.nombreIntegrante1
+                }
                 onChange={(event) =>
                   update(
                     "nombreIntegrante1",
@@ -369,16 +478,22 @@ export function RegistrationModal({
 
               {errors.nombreIntegrante1 && (
                 <small className="field-error">
-                  {errors.nombreIntegrante1}
+                  {
+                    errors.nombreIntegrante1
+                  }
                 </small>
               )}
             </label>
 
             <label className="field">
-              <span>Segundo integrante</span>
+              <span>
+                Segundo integrante
+              </span>
 
               <input
-                value={form.nombrePareja}
+                value={
+                  form.nombrePareja
+                }
                 onChange={(event) =>
                   update(
                     "nombrePareja",
@@ -390,16 +505,22 @@ export function RegistrationModal({
 
               {errors.nombrePareja && (
                 <small className="field-error">
-                  {errors.nombrePareja}
+                  {
+                    errors.nombrePareja
+                  }
                 </small>
               )}
             </label>
 
             <label className="field">
-              <span>Tercer integrante</span>
+              <span>
+                Tercer integrante
+              </span>
 
               <input
-                value={form.nombreCompanero2}
+                value={
+                  form.nombreCompanero2
+                }
                 onChange={(event) =>
                   update(
                     "nombreCompanero2",
@@ -411,7 +532,9 @@ export function RegistrationModal({
 
               {errors.nombreCompanero2 && (
                 <small className="field-error">
-                  {errors.nombreCompanero2}
+                  {
+                    errors.nombreCompanero2
+                  }
                 </small>
               )}
             </label>
@@ -420,26 +543,38 @@ export function RegistrationModal({
 
         {showPartnerQuestion && (
           <label className="field">
-            <span>¿Vienes con pareja?</span>
+            <span>
+              ¿Vienes con pareja?
+            </span>
 
             <select
               value={form.pareja}
               onChange={(event) => {
-                const value = event.target
-                  .value as FormState["pareja"];
+                const value =
+                  event.target
+                    .value as FormState["pareja"];
 
                 update("pareja", value);
 
                 if (value !== "si") {
-                  update("nombrePareja", "");
+                  update(
+                    "nombrePareja",
+                    "",
+                  );
                 }
               }}
             >
               <option value="">
                 Selecciona una opción
               </option>
-              <option value="si">Sí</option>
-              <option value="no">No</option>
+
+              <option value="si">
+                Sí
+              </option>
+
+              <option value="no">
+                No
+              </option>
             </select>
 
             {errors.pareja && (
@@ -453,10 +588,14 @@ export function RegistrationModal({
         {sport.teamMode !== "team-3" &&
           showPartnerName && (
             <label className="field">
-              <span>Nombre de la pareja</span>
+              <span>
+                Nombre de la pareja
+              </span>
 
               <input
-                value={form.nombrePareja}
+                value={
+                  form.nombrePareja
+                }
                 onChange={(event) =>
                   update(
                     "nombrePareja",
@@ -468,7 +607,9 @@ export function RegistrationModal({
 
               {errors.nombrePareja && (
                 <small className="field-error">
-                  {errors.nombrePareja}
+                  {
+                    errors.nombrePareja
+                  }
                 </small>
               )}
             </label>
@@ -476,23 +617,38 @@ export function RegistrationModal({
 
         {sport.levelOptions && (
           <label className="field">
-            <span>Nivel</span>
+            <span>
+              {sport.levelLabel ||
+                "Nivel"}
+            </span>
 
             <select
               value={form.nivel}
               onChange={(event) =>
-                update("nivel", event.target.value)
+                update(
+                  "nivel",
+                  event.target.value,
+                )
               }
             >
               <option value="">
-                Selecciona tu nivel
+                {sport.levelPlaceholder ||
+                  "Selecciona una opción"}
               </option>
-              <option value="A">
-                A · Alto/medio
-              </option>
-              <option value="B">
-                B · Medio/bajo
-              </option>
+
+              {sport.levelOptions.map(
+                (option) => (
+                  <option
+                    key={option}
+                    value={option}
+                  >
+                    {sport
+                      .levelOptionLabels?.[
+                      option
+                    ] || option}
+                  </option>
+                ),
+              )}
             </select>
 
             {errors.nivel && (
@@ -513,7 +669,10 @@ export function RegistrationModal({
               max="120"
               value={form.edad}
               onChange={(event) =>
-                update("edad", event.target.value)
+                update(
+                  "edad",
+                  event.target.value,
+                )
               }
               placeholder="Edad"
             />
