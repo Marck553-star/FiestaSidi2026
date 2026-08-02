@@ -28,6 +28,9 @@ export interface SportDefinition {
 
   readonly requiresAge?: boolean;
   readonly registrationNote?: string;
+  readonly commentsLabel?: string;
+  readonly commentsPlaceholder?: string;
+  readonly commentsRequired?: boolean;
 
   readonly prizes: readonly PrizeDefinition[];
   readonly prizeNote?: string;
@@ -356,6 +359,21 @@ const SPORT_DEFINITIONS = {
     teamMode: "individual",
     fixedParticipants: 1,
     prizes: firstSecond(1, 1),
+  },
+  chinchon: {
+    key: "chinchon",
+    name: "Chinchón",
+    shortName: "Chinchón",
+    category: "Juegos de mesa",
+
+    teamMode: "individual",
+    fixedParticipants: 1,
+
+    commentsLabel: "Descripción",
+    commentsPlaceholder: "Escribe una breve descripción",
+    commentsRequired: true,
+
+    prizes: [],
   },
 
   ajedrez: {
