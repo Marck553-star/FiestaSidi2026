@@ -338,6 +338,10 @@ export function RegistrationModal({
       const data = await response
         .json()
         .catch(() => ({}));
+      if (data.blocked === true) {
+        return;
+      }
+
 
       if (!response.ok) {
         const fieldErrors =

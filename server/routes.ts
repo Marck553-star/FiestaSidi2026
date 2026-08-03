@@ -109,6 +109,11 @@ export function registerRoutes(app: Express): void {
   });
 
   app.post("/api/registrations", async (request, response) => {
+    if (process.env.REGISTRATIONS_OPEN !== "true") {
+      return res.status(200).json({
+        blocked: true,
+      });
+    }
     const validation = registrationSchema.safeParse(request.body);
 
     if (!validation.success) {
